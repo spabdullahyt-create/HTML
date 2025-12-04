@@ -1,10 +1,9 @@
-// api/upload.js
 import fs from 'fs';
 import fetch from 'node-fetch';
 import formidable from 'formidable';
 
 export const config = {
-  api: { bodyParser: false } // Required for file uploads
+  api: { bodyParser: false } // required for file uploads
 };
 
 export default async function handler(req, res) {
@@ -17,12 +16,16 @@ export default async function handler(req, res) {
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
-      res.status(500).json({ error: 'Error parsing file' });
+      res.status(500).json({ error: 'Error parsing file', details: err.message });
       return;
     }
 
     try {
       const file = files.file;
+      if (!file) {
+        res.status(400).json({ error: 'No file uploaded' });
+        return;
+      }
 
       const fileData = fs.readFileSync(file.filepath);
 
@@ -43,7 +46,7 @@ export default async function handler(req, res) {
       }
     } catch (e) {
       console.error(e);
-      res.status(500).json({ error: 'Server error' });
+      res.status(500).json({ error: 'Server error', details: e.message });
     }
   });
-        }
+}
